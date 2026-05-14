@@ -1,9 +1,10 @@
-# ChatGPT - 13/05/2026
+# ChatGPT - 14/05/2026 - V2
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 import os
+import pyfiglet
 
 TOKEN = os.getenv("TOKEN")  # IMPORTANT: don't hardcode this
 KEY = 3
@@ -37,5 +38,25 @@ async def encrypt_cmd(interaction: discord.Interaction, message: str):
 @bot.tree.command(name="decrypt", description="Decrypt a message")
 async def decrypt_cmd(interaction: discord.Interaction, message: str):
     await interaction.response.send_message(f"🔓 {decrypt(message, KEY)}")
+
+@bot.tree.command(name="ascii", description="Turn text into ASCII art")
+async def ascii_cmd(interaction: discord.Interaction, message: str):
+    try:
+        ascii_text = pyfiglet.figlet_format(message)
+
+        if not ascii_text.strip():
+            await interaction.response.send_message("⚠️ Couldn't generate ASCII art")
+            return
+
+        # Discord limit safety
+        if len(ascii_text) > 1900:
+            await interaction.response.send_message("⚠️ Text too long for ASCII output")
+            return
+
+        await interaction.response.send_message(f"```\n{ascii_text}\n```")
+
+    except Exception as e:
+        print(e)  # shows error in Railway logs
+        await interaction.response.send_message("❌ Error generating ASCII art")
 
 bot.run(TOKEN)
